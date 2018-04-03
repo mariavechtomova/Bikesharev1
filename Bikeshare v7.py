@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+ -*- coding: utf-8 -*-
 """
 Created on Mon Apr  2 08:09:31 2018
 
@@ -53,9 +53,9 @@ def get_filters():
     return city, month, day
   
 
-city_data = { "chicago": "C:/Users/aguerrero/Pictures/Saved Pictures/Py/chicago.csv",
-             "new york city": "C:/Users/aguerrero/Pictures/Saved Pictures/Py/new_york_city.csv",
-              "washington": "C:/Users/aguerrero/Pictures/Saved Pictures/Py/washington.csv" }
+city_data = { "chicago": "chicago.csv",
+             "new york city": "new_york_city.csv",
+              "washington": "washington.csv" }
 
 
 def load_data(city, month, day):
