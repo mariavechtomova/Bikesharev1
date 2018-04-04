@@ -30,16 +30,21 @@ def get_filters():
         city = input ("Please, enter a city name to analyze. You can choose between: Chicago, New York City, Washington or all: ").lower()
     else:
         print("You selected the city!")
-        
+
     # get user input for month (all, january, february, ... , june)
 
     month = input("Now, please enter the month you want to analyze: January, February,... or all!: ").lower()
-    while month not in ("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december", "all"):
+    if city=='chicago':
+        while month not in ("january", "february", "march", "april", "may", "june", "july", "all"): ## please check it
+            print("For Chicago only months from january till july available") ## please check it
+            month = input("Now, please enter the month you want to analyze: January, February,... or all!: ").lower()
+    else:
+        while month not in ("january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december", "all"):
         print("Ups, something went wrong, please check your input!")
         month = input("Now, please enter the month you want to analyze: January, February,... or all!: ").lower()
     else:
         print("You selected the month...")
-        
+
     # get user input for day of week (all, monday, tuesday, ... sunday)
 
     day = input ("please select the day of the week for your analysis!: ").lower()
@@ -51,7 +56,7 @@ def get_filters():
 
     print('-'*40)
     return city, month, day
-  
+
 
 city_data = { "chicago": "chicago.csv",
              "new york city": "new_york_city.csv",
@@ -59,7 +64,7 @@ city_data = { "chicago": "chicago.csv",
 
 
 def load_data(city, month, day):
-    
+
     """
     Loads data for the specified city and filters by month and day if applicable.
 
@@ -70,48 +75,45 @@ def load_data(city, month, day):
     Returns:
         df - Pandas DataFrame containing city data filtered by month and day
     """
-    
+
     df = pd.read_csv(city_data[city])
-    if city == ("washington"):
-        df["Gender"] = 0
-        df["Birth Year"] = 0
-        df['Start Time'] = pd.to_datetime(df["Start Time"])
-    
-    df["month"] = df["Start Time"].dt.month
-    
+    #if city == ("washington"):
+    #    df["Gender"] = 0
+    #    df["Birth Year"] = 0
+    df['Start Time'] = pd.to_datetime(df["Start Time"])
+
+    df['month'] = df['Start Time'].dt.strftime('%B')
+
     df["day_of_week"] = df["Start Time"].dt.weekday_name
     if month != "all":
-        months =["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
-        month = months.index(month) + 1
-        
         df = df[df["month"] == month]
-        
-        if day != "all":
-            df = df[df["day_of_week"] == day.title()]
-    
+
+    if day != "all":
+        df = df[df["day_of_week"] == day]
+
     return df
-       
+
 
 def time_stats(df):
-    
+
     """Displays statistics on the most frequent times of travel."""
 
     print('\nCalculating The Most Frequent Times of Travel...\n')
     start_time = time.time()
-    
+
     # display the most common month
-    df["Start time"] = pd.to_datetime(df["Start Time"])
-    df["month"] = df["Start time"].dt.month
-    most_common_month = df["month"].mode()
+    ## df["Start time"] = pd.to_datetime(df["Start Time"]) not needed, alreay present in df
+    ##df["month"] = df["Start time"].dt.month not needed, alreay present in df
+    most_common_month = df["month"].mode()[0]
     print("Most Frequent Month: ", most_common_month)
 
     # display the most common day of week
-    df["day"] = df ["Start time"].dt.day
-    most_common_day = df["day"].mode()
+    ## df["day"] = df ["Start time"].dt.day not needed, already present in df
+    most_common_day = df["day"].mode()[0]
     print ("Most Frequent Day: ", most_common_day)
     # display the most common start hour
     df["hour"] = df["Start Time"].dt.hour
-    most_common_hour = df["hour"].mode()
+    most_common_hour = df["hour"].mode()[0]
     print ("Most Frequent Hour: ", most_common_hour)
 
     print("\nThis took %s seconds." % (time.time() - start_time))
@@ -125,11 +127,11 @@ def station_stats(df):
     start_time = time.time()
 
     # display most commonly used start station
-    most_common_start_station = df["Start Station"].mode()
+    most_common_start_station = df["Start Station"].mode()[0]
     print("Most common Start Station: ", most_common_start_station)
 
     # display most commonly used end station
-    most_common_end_station = df["End Station"].mode()
+    most_common_end_station = df["End Station"].mode()[0]
     print("Most common End Station: ", most_common_end_station)
 
     # display most frequent combination of start station and end station trip
@@ -157,7 +159,7 @@ def trip_duration_stats(df):
     print('-'*40)
 
 
-def user_stats(df):
+def user_stats(df, city):
     """Displays statistics on bikeshare users."""
 
     print('\nCalculating User Stats...\n')
@@ -166,18 +168,24 @@ def user_stats(df):
     # Display counts of user types
     user_types = df["User Type"].value_counts()
     print(user_types)
-    
+
     # Display counts of gender
-    counts_of_gender = df["Gender"].value_counts()
-    print(counts_of_gender)
-   
+    if city=='washington':
+        print('Gender information for Washington is unavailable and can not be calculated')
+    else:
+        counts_of_gender = df["Gender"].value_counts()
+        print(counts_of_gender)
+
     # Display earliest, most recent, and most common year of birth
-    earliest_year = df["Birth Year"].min()
-    print("Earliest Year of Birth:", int(earliest_year))
-    most_recent = df["Birth Year"].max()
-    print("Most Recent Year of Birth:", int(most_recent))
-    most_common_year = df["Birth Year"].mode()
-    print("Most Common Year of Birth:", int(most_common_year))
+    if city=='washington':
+        print('Birthday information for Washington is unavailable and can not be calculated')
+    else:
+        earliest_year = df["Birth Year"].min()
+        print("Earliest Year of Birth:", int(earliest_year))
+        most_recent = df["Birth Year"].max()
+        print("Most Recent Year of Birth:", int(most_recent))
+        most_common_year = df["Birth Year"].mode()
+        print("Most Common Year of Birth:", int(most_common_year))
 
 
     print("\nThis took %s seconds." % (time.time() - start_time))
@@ -192,7 +200,7 @@ def main():
         time_stats(df)
         station_stats(df)
         trip_duration_stats(df)
-        user_stats(df)
+        user_stats(df, city)
 
         restart = input('\nWould you like to restart? Enter yes or no.\n')
         if restart.lower() != 'yes':
